@@ -1,0 +1,15 @@
+
+        +------------------+
+        o/                \o
+        | { KNOWN ISSUES } |
+        0\                /0
+        +------------------+
+
+*** Besides being an incomplete prototype ***
+
+06/30/2018: The function that checks for whether or not user input exceeds
+            current resources only works on the first check. If a user 
+            answers no, they can then input a value of resources greater
+            then what they possess. 
+
+
