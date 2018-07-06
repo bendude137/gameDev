@@ -8,8 +8,13 @@
 *** Besides being an incomplete prototype ***
 
 06/30/2018: The function that checks for whether or not user input exceeds
-            current resources only works on the first check. If a user 
-            answers no, they can then input a value of resources greater
-            then what they possess. 
+(Fixed:     current resources only works on the first check. If a user 
+Ben)        answers no, they can then input a value of resources greater
+            then what they possess.
+			
 
-
+07/6/2018:  if user inputs number of food to use followed by the char "y"
+            i.e. "200y" and hits enter the confirmation check immediatly
+            passes successfully, bypassing the users opertunity to double
+            check there input
+            (maybe...  if (last couple char in stin != "y"||"Y")
