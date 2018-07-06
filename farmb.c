@@ -16,10 +16,10 @@
 *****************************************************************/
 
 /* Global Variables  */
-int food, tempFood, foodReplant, population, happyness, popFoodInput, popFoodRatio; 
+int food, tempFood, UsedFood, foodReplant, population, happyness, popFoodInput, popFoodRatio; 
 int year, endCondition;
-int ErrChk;
-char answer[1024];
+int confirmYear;
+char answer[1024], badInput[1];
 char playerName[1024];
 char colonyName[1024];
 
@@ -30,74 +30,119 @@ int rando(int MIN, int MAX)
     return MIN + rand() % (MAX + 1 - MIN);
 }
 
-void checkAnswer(int section)
+int checkAnswer(int section, int subSection)
 {
 	if (section == 1)
 	{
-		ErrChk = 1;
-		while(ErrChk == 1)
+		if (subSection == 1)
 		{
 			printf("How much food do you want to feed your population?: ");
-			scanf("%d", &popFoodInput);
-			if (food - popFoodInput >= 0)
+			if (scanf("%d", &popFoodInput) != 1)
 			{
-				printf("Feed population %i bushels of food?              Result: %i Bushels left. [Y/N]\n", popFoodInput, food - popFoodInput);
+				scanf("%s", badInput);
+				return 0;
+			}
+			if (food - popFoodInput >= 0) 
+			{
+				printf("Feed population %i bushels of food? Result: %i Bushels left. [Y/N(Any Key)]\n", popFoodInput, food - popFoodInput);
 				scanf("%s", answer);
 				if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0)
 				{
 					tempFood = food - popFoodInput;
-					printf("How much food will you plant?: ");
-					scanf("%d", &foodReplant);
-					if (tempFood - foodReplant >=0)
-					{
-						printf("Replant %i bushels of food?              Result: %i Bushels left. [Y/N]\n", foodReplant, tempFood - foodReplant);
-						scanf("%s", answer);
-						if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0)
-						{
-							ErrChk = 0;
-						}
-					}
-					else
-					{
-						printf("Can not Replant  %i bushels of food!              Result: %i Bushels left. Try Again.\n", foodReplant, tempFood - foodReplant);
-						scanf("%s", answer);
-					}
+					return 1;
 				}
 			}
 			else
 			{
-				printf("Can not feed population %i bushels of food!              Result: %i Bushels left. Try Again.", popFoodInput, food - popFoodInput);
+				printf("Can not feed population %i bushels of food! Result: %i Bushels left. Try Again.", popFoodInput, food - popFoodInput);
 				scanf("%s", answer);
 			}
-			  
 		}
-		
-	}
-	else if (section == 2)
-	{
-		ErrChk = 1;
-		while(ErrChk == 1)
+		else if (subSection == 2)
 		{
-			printf("%s", "Please enter your name:");
-			scanf("%s", playerName);
-			
-			printf("%s", "What is the name of this new colony?:");
-			scanf("%s", colonyName);
-			system("clear");
-			
-			/* Error check for name and town name preformed by user */
-			printf("Welcome mayor %s! You will be the mayor of %s, a budding colony with many challenges to face.\nAre you happy with your choices so far? [Y/N]:", playerName, colonyName);
-			scanf("%s", answer);
-			if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0)
-			{	
-				ErrChk = 0;
+			printf("How much food will you plant?: ");
+			if (scanf("%d", &foodReplant) != 1)
+			{
+				scanf("%s", badInput);
+				return 0;
+			}
+			if (tempFood - foodReplant >=0)
+			{
+				printf("Replant %i bushels of food? Result: %i Bushels left. [Y/N(Any Key)]\n", foodReplant, tempFood - foodReplant);
+				scanf("%s", answer);
+				if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0)
+				{
+					return 1;
+				}
 			}
 			else
 			{
-			system("clear");
+				printf("Can not Replant  %i bushels of food! Result: %i Bushels left. Try Again.\n", foodReplant, tempFood - foodReplant);
+				scanf("%s", answer);
 			}
 		}
 	}
+	else if (section == 2)
+	{
+
+		printf("%s", "Please enter your name:");
+		scanf("%s", playerName);
+			
+		printf("%s", "What would you like to name your new colony?:");
+		scanf("%s", colonyName);
+		system("clear");
+			
+		/* Error check for name and town name preformed by user */
+		printf("Welcome mayor %s! You will be the mayor of %s, a budding colony with many challenges to face.\nAre you happy with your choices so far? [Y/N(Any Key)]:", playerName, colonyName);
+		scanf("%s", answer);
+		if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0)
+		{	
+			return 1;
+		}
+		else
+		{
+		system("clear");
+		}
+	}
+	return 0;
+}
+
+void dispTownInfo()
+{
+	printf("\nCURRENT STATS\n");
+	printf("-------------------------\n");
+	printf("Year: %d\nMayor: %s\nColony: %s\n", year, playerName, colonyName);
+	printf("Food: %d", food);
+	if (popFoodInput != 0)
+	{
+		printf("-%d :%d(Unused)", UsedFood, food-(UsedFood));
+
+	}
+	printf("\nPopulation: %d\nHappyness: %d\n\n", population, happyness);
+}
+
+void doMath()
+{
+	popFoodRatio = popFoodInput / population;
+
+    if (popFoodRatio >= 3)
+    {
+        population = population + (population * .1);
+    }
+    else if (popFoodRatio == 2)
+    {
+        population = population + (population * .03);
+    }
+    else if (popFoodRatio == 1)
+    {
+        population = population - (population * .03);
+        happyness = happyness - 5;
+    }
+    else
+    {
+        population = population - (population * .1);
+        happyness = happyness - 10;
+    }
 }
 
 int main(void)
@@ -113,39 +158,54 @@ int main(void)
     system("clear");
 
 	/* CheckAnswer:section 2. For asking user for initial settings */
-	checkAnswer(2);
+	while (checkAnswer(2,1) != 1)
+	{
+		system("clear");
+	}
 	
 	/* Main Game Loop  */
     while (endCondition == 0) 
     {
-		printf("\nCURRENT STATS\n");
-		printf("-------------------------\n");
-		printf("Year: %d\nMayor: %s\nColony: %s\n", year, playerName, colonyName);
-		printf("Food: %d\nPopulation: %d\nHappyness: %d\n\n", food, population, happyness);
+		confirmYear = 0;
+		while (confirmYear == 0)
+		{
+			system("clear");
+			dispTownInfo();
+			while (checkAnswer(1,1) != 1)   /*get popFoodInput*/ 
+			{
+				system("clear");
+				dispTownInfo();
+			}
+			UsedFood = popFoodInput;
+			
+			system("clear");
+			dispTownInfo();
+			while (checkAnswer(1,2) != 1)  /*get foodReplant*/
+			{
+				system("clear");
+				dispTownInfo();
+			}
+			UsedFood += foodReplant;
+			                              /*After all user input is gathered, confirm total rescource usage for year*/
+			system("clear");
+			dispTownInfo();
+			printf("Are you ready to see how your choises effect %s for the coming year? [Y/N(Any Key)]:", colonyName);
+			scanf("%s", answer);
+			if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0)
+			{	
+				confirmYear = 1;
+			}
+			else 
+			{
+				popFoodInput = 0;
+				foodReplant = 0;
+			}
+		}
+			
 		
-		checkAnswer(1);
-		system("clear");
-		popFoodRatio = popFoodInput / population;
+		/* end of round math */
+		doMath();
 
-        if (popFoodRatio >= 3)
-        {
-            population = population + (population * .1);
-        }
-        else if (popFoodRatio == 2)
-        {
-            population = population + (population * .03);
-        }
-        else if (popFoodRatio == 1)
-        {
-            population = population - (population * .03);
-            happyness = happyness - 5;
-        }
-        else
-        {
-            population = population - (population * .1);
-            happyness = happyness - 10;
-        }
-    
         /* endCondition meanings | 1 = victory | 2 = failure | 0 = win  */
         /* Evaluate victory conditions  */
         if (happyness < 0)
@@ -160,8 +220,15 @@ int main(void)
         {
             endCondition = 1;
         }
-  
-        if (endCondition == 2)
+
+        /* Set up next year */
+        food = foodReplant * rando(1, 5);
+        year++;
+        popFoodInput = 0;
+        foodReplant = 0;
+    }
+    
+      if (endCondition == 2)
         {
             system("clear");
             printf("Years of starvation and mismagement have finally\n");
@@ -172,7 +239,6 @@ int main(void)
             printf("Mayor %s was thrown in jail for incompetance\n", playerName);
             printf("and a new chapter of %s has begun.\n", colonyName);
             printf("\nYou failed, feel free to try again\n");
-            exit(0);
         }
         else if (endCondition == 1)
         {
@@ -184,14 +250,7 @@ int main(void)
             printf("%s. Beloved by all a statue was erected to\n", playerName);
             printf("celebrate their part in the colonys founding\n");
             printf("\nCongradulations you won, play again sometime\n");
-            exit(0);
         }
-
-        /* End turn calculations */
-        food = foodReplant * rando(1, 5);
-        year++;
-    }
-
 
     return 0;
 
